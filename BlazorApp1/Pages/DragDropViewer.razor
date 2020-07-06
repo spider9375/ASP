@@ -1,13 +1,23 @@
 ﻿@page "/upload"
-@using Data.Interfaces;
 @inject IDealershipService dealershipService;
 @inject IMappingService mappingService;
 
 <h1>Импорт на автокъща</h1>
-
 <div class="drag-drop-zone">
-    <InputFile multiple OnChange="HandleSelection" />
-    @status
+    <InputFile OnChange="UploadSchema" />
+    @uploadSchemaStatus
+</div>
+@if (schemas.Count > 0)
+{
+    <div class="drag-drop-zone">
+    
+        <InputFile multiple OnChange="HandleSelection" />
+        @status
+    </div>
+}
+
+<div>
+    <p>@schemaValidationErrors</p>
 </div>
 
 
@@ -35,11 +45,11 @@
             <button @onclick="() => UploadFile(file)" disabled="@isLoading">
                 @if (!isLoading)
                 {
-                    <span>Upload</span>
+                    <span>Импорт</span>
                 }
                 else
                 {
-                    <span>Uploaded @((100.0 * file.Data.Position / file.Size).ToString("0"))%</span>
+                    <span>Импортирано @((100.0 * file.Data.Position / file.Size).ToString("0"))%</span>
                 }
             </button>
         </div>
@@ -55,29 +65,85 @@
     }
 
     const string DefaultStatus = "Пуснете файл тук, или кликнете, за да изберете файл/ове";
+    const string DefaultUploadSchemaStatus = "Импорт на схема";
+    XmlSerializer serializer = new XmlSerializer(typeof(DealershipModel));
+    XmlSchemaSet schemas = new XmlSchemaSet();
+    string schemaValidationErrors = "";
     const int MaxFileSize = 5 * 1024 * 1024; // 5MB
     string status = DefaultStatus;
+    string uploadSchemaStatus = DefaultUploadSchemaStatus;
 
     string fileName;
     string fileTextContents;
 
+    protected override void OnInitialized()
+    {
+        this.schemas = this.dealershipService.GetSchemaSet();
+        if (schemas.Count == 0)
+        {
+            this.uploadSchemaStatus = "Ипортирай схема";
+        }
+        else
+        {
+            this.uploadSchemaStatus = "Схемата е заредена от базата";
+        }
+    }
+
     void UploadAll()
     {
-        var models = this.selectedFiles.Select(x => this.mappingService.XmlToModel(this.LoadFile(x).Result)).ToList();
+        var models = this.selectedFiles.Select(x => this.mappingService.XmlToModel((DealershipModel)serializer.Deserialize(this.LoadFile(x).Result))).ToList();
 
         this.dealershipService.Add(models);
     }
 
-    async Task UploadFile(IFileListEntry file)
+    async Task UploadSchema(IFileListEntry[] files)
     {
-        var xml = await this.LoadFile(file);
+        var file = files.FirstOrDefault();
+        if (file.Name.Contains(".xsd"))
+        {
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
 
-        var model = this.mappingService.XmlToModel(xml);
+            var xmlReader = this.dealershipService.UploadSchema(ms);
 
-        this.dealershipService.Add(model);
+            schemas.Add(@"https://www.w3schools.com", xmlReader);
+
+            this.uploadSchemaStatus = "Схемата импортирана успешно";
+        }
+
     }
 
-    async Task<DealershipModel> LoadFile(IFileListEntry file)
+    async Task UploadFile(IFileListEntry file)
+    {
+        //var xmlReader = await this.LoadFile(file);
+        var ms = new MemoryStream();
+        await file.Data.CopyToAsync(ms);
+        string str = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+        var xmlReader = XmlReader.Create(new StringReader(str));
+
+        XmlSerializer ser = new XmlSerializer(typeof(DealershipModel));
+        var xml = (DealershipModel)serializer.Deserialize(xmlReader);
+        XDocument doc = XDocument.Parse(str);
+
+        string msg = "";
+        doc.Validate(schemas, (o, e) =>
+        {
+            msg += e.Message + Environment.NewLine;
+        });
+
+        if (msg.Length > 0)
+        {
+            this.schemaValidationErrors = msg;
+        }
+        else
+        {
+            var model = this.mappingService.XmlToModel(xml);
+
+            this.dealershipService.Add(model);
+        }
+    }
+
+    async Task<XmlReader> LoadFile(IFileListEntry file)
     {
         // So the UI updates to show progress
         file.OnDataRead += (sender, eventArgs) => InvokeAsync(StateHasChanged);
@@ -86,13 +152,10 @@
         // Alternatively it could be saved to disk, or parsed in memory, or similar
         var ms = new MemoryStream();
         await file.Data.CopyToAsync(ms);
-        XmlSerializer serializer = new XmlSerializer(typeof(DealershipModel));
         string str = System.Text.Encoding.UTF8.GetString(ms.ToArray());
         var xmlReader = XmlReader.Create(new StringReader(str));
 
-        var result = (DealershipModel)serializer.Deserialize(xmlReader);
-
-        return result;
+        return xmlReader;
     }
 
     async Task ViewFile(IFileListEntry[] files)

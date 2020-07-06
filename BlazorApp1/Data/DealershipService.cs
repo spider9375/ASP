@@ -5,8 +5,12 @@ using Car_Dealership.Models;
 using Car_Dealership.Models.DB;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Metadata.Edm;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace BlazorApp1.Data
 {
@@ -60,6 +64,58 @@ namespace BlazorApp1.Data
                     Address = x.Address,
                 })
                 .ToList();
+
+            return result;
+        }
+
+        public DealershipViewModel GetDealershipDetails(int dealershipId)
+        {
+            var entity = this.dbContext.Dealerships.Find(dealershipId);
+
+            return new DealershipViewModel
+            {
+                Id = entity.Id,
+                Address = entity.Address,
+            };
+        }
+
+        public XmlSchemaSet GetSchemaSet()
+        {
+            XmlSchemaSet schemas = new XmlSchemaSet();
+            var schema = this.dbContext.Schemas.FirstOrDefault();
+
+            if (schema != null)
+            {
+                var xmlReader = XmlReader.Create(new StringReader(System.Text.Encoding.UTF8.GetString(schema.Content)));
+                schemas.Add(@"https://www.w3schools.com", xmlReader);
+            }
+
+            return schemas;
+        }
+
+        public XmlReader UploadSchema(MemoryStream stream)
+        {
+            byte[] byteArray = stream.ToArray();
+            
+
+            var entity = new DB.Schema()
+            {
+                Content = byteArray,
+            };
+
+            var exising = this.dbContext.Schemas.FirstOrDefault();
+
+            if (exising != null)
+            {
+                this.dbContext.Schemas.Remove(exising);
+
+            }
+            this.dbContext.Schemas.Add(entity);
+            this.dbContext.SaveChanges();
+
+            string str = System.Text.Encoding.UTF8.GetString(byteArray);
+
+            var result = XmlReader.Create(new StringReader(str));
 
             return result;
         }

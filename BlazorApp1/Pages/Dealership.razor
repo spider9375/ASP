@@ -1,6 +1,6 @@
 ﻿@page "/Dealership/{dealershipId:int}"
 @inject BlazorApp1.Data.Interfaces.IDealershipService dealershipService;
-<h3>@dealershipId</h3>
+<h3>@dealership.Address</h3>
 
 @if (cars == null)
 {
@@ -37,9 +37,11 @@ else
     [Parameter]
     public int dealershipId { get; set; }
     private List<BlazorApp1.Data.ViewModels.CarsTableViewModel> cars;
+    private BlazorApp1.Data.ViewModels.DealershipViewModel dealership;
 
     protected override void OnInitialized()
     {
         this.cars = this.dealershipService.GetCarsDataTableData(dealershipId);
+        this.dealership = this.dealershipService.GetDealershipDetails(dealershipId);
     }
 }

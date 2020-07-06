@@ -1,4 +1,5 @@
-﻿using BlazorApp1.Data.Interfaces;
+﻿using BlazorApp1.Data.DB;
+using BlazorApp1.Data.Interfaces;
 using Car_Dealership.Models.DB;
 using System.Data.Entity;
 
@@ -23,5 +24,7 @@ namespace Car_Dealership
         public DbSet<VisualDetails> VisualDetails { get; set; }
 
         public DbSet<Wheels> Wheels { get; set; }
+
+        public DbSet<Schema> Schemas { get; set; }
     }
 }

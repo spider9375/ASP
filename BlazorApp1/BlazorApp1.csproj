@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\DB\" />
     <Folder Include="Data\XML\" />
   </ItemGroup>
 
