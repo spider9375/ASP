@@ -1,0 +1,142 @@
+﻿@page "/upload"
+@using Data.Interfaces;
+@inject IDealershipService dealershipService;
+@inject IMappingService mappingService;
+
+<h1>Импорт на автокъща</h1>
+
+<div class="drag-drop-zone">
+    <InputFile multiple OnChange="HandleSelection" />
+    @status
+</div>
+
+
+
+@if (selectedFiles != null)
+{
+    <div>
+        <button class="btn-primary" onclick="UploadAll">Прикачи всички</button>
+    </div>
+    foreach (var file in selectedFiles)
+    {
+        var isLoading = file.Data.Position > 0;
+
+        <div class="file-row">
+            <!-- File info -->
+            <div>
+                <h2>@file.Name</h2>
+                Size: <strong>@file.Size bytes</strong>;
+                Last modified: <strong>@file.LastModified.ToShortDateString()</strong>;
+                Type: <strong>@file.Type</strong>
+                Relative Path: <strong>@file.RelativePath</strong>
+            </div>
+
+            <!-- Upload button -->
+            <button @onclick="() => UploadFile(file)" disabled="@isLoading">
+                @if (!isLoading)
+                {
+                    <span>Upload</span>
+                }
+                else
+                {
+                    <span>Uploaded @((100.0 * file.Data.Position / file.Size).ToString("0"))%</span>
+                }
+            </button>
+        </div>
+    }
+}
+
+@code {
+    IFileListEntry[] selectedFiles;
+
+    void HandleSelection(IFileListEntry[] files)
+    {
+        selectedFiles = files;
+    }
+
+    const string DefaultStatus = "Пуснете файл тук, или кликнете, за да изберете файл/ове";
+    const int MaxFileSize = 5 * 1024 * 1024; // 5MB
+    string status = DefaultStatus;
+
+    string fileName;
+    string fileTextContents;
+
+    void UploadAll()
+    {
+        var models = this.selectedFiles.Select(x => this.mappingService.XmlToModel(this.LoadFile(x).Result)).ToList();
+
+        this.dealershipService.Add(models);
+    }
+
+    async Task UploadFile(IFileListEntry file)
+    {
+        var xml = await this.LoadFile(file);
+
+        var model = this.mappingService.XmlToModel(xml);
+
+        this.dealershipService.Add(model);
+    }
+
+    async Task<DealershipModel> LoadFile(IFileListEntry file)
+    {
+        // So the UI updates to show progress
+        file.OnDataRead += (sender, eventArgs) => InvokeAsync(StateHasChanged);
+
+        // Just load into .NET memory to show it can be done
+        // Alternatively it could be saved to disk, or parsed in memory, or similar
+        var ms = new MemoryStream();
+        await file.Data.CopyToAsync(ms);
+        XmlSerializer serializer = new XmlSerializer(typeof(DealershipModel));
+        string str = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+        var xmlReader = XmlReader.Create(new StringReader(str));
+
+        var result = (DealershipModel)serializer.Deserialize(xmlReader);
+
+        return result;
+    }
+
+    async Task ViewFile(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file == null)
+        {
+            return;
+        }
+        else if (file.Size > MaxFileSize)
+        {
+            status = $"That's too big. Max size: {MaxFileSize} bytes.";
+        }
+
+        XmlSerializer serializer = new XmlSerializer(typeof(DealershipModel));
+
+        var ms = new System.IO.MemoryStream();
+        await file.Data.CopyToAsync(ms);
+
+
+
+
+
+
+        //XmlSchemaSet schemas = new XmlSchemaSet();
+        //schemas.Add(@"https://www.w3schools.com", "schema.xsd");
+        //XDocument doc = XDocument.Load("dealership.xml");
+        //string msg = "";
+        //doc.Validate(schemas, (o, e) =>
+        //{
+        //    msg += e.Message + Environment.NewLine;
+        //});
+        //Console.WriteLine(msg == "" ? "Document is valid" : "Document invalid: " + msg);
+        //else
+        //{
+        //    status = "Loading...";
+
+        //    using (var reader = new StreamReader(file.Data))
+        //    {
+        //        fileTextContents = await reader.ReadToEndAsync();
+        //        fileName = file.Name;
+        //    }
+
+        //    status = DefaultStatus;
+        //}
+    }
+}

@@ -1,0 +1,49 @@
+﻿@page "/dealerships"
+
+@using BlazorApp1.Data.Interfaces;
+@using BlazorApp1.Data.ViewModels;
+@inject IDealershipService DealershipService;
+
+<h1>Автокъщи</h1>
+
+@if (dealerships == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Адрес</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dealership in dealerships)
+            {
+                <tr>
+                    <td>@dealership.Id</td>
+                    <td>@dealership.Address</td>
+                    <td>
+                        <a href="/Dealership/@dealership.Id"><i class="glyphicon glyphicon-search"></i></a>
+
+                        @*<button type="submit" asp-page-handler="delete"
+                                    asp-route-id="@dealership.Id">
+                                delete
+                            </button>*@
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<DealershipViewModel> dealerships;
+
+    protected override void OnInitialized()
+    {
+        dealerships = this.DealershipService.GetDealershipDataTable();
+    }
+}
