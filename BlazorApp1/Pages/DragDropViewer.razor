@@ -16,10 +16,6 @@
     </div>
 }
 
-<div>
-    <p>@schemaValidationErrors</p>
-</div>
-
 
 
 @if (selectedFiles != null)
@@ -38,8 +34,13 @@
                 Size: <strong>@file.Size bytes</strong>;
                 Last modified: <strong>@file.LastModified.ToShortDateString()</strong>;
                 Type: <strong>@file.Type</strong>
-                Relative Path: <strong>@file.RelativePath</strong>
             </div>
+            @if (schemaValidationErrors.Count > 0)
+            {
+                <div>
+                    <p>@schemaValidationErrors[file.Name]</p>
+                </div>
+            }
 
             <!-- Upload button -->
             <button @onclick="() => UploadFile(file)" disabled="@isLoading">
@@ -68,7 +69,7 @@
     const string DefaultUploadSchemaStatus = "Импорт на схема";
     XmlSerializer serializer = new XmlSerializer(typeof(DealershipModel));
     XmlSchemaSet schemas = new XmlSchemaSet();
-    string schemaValidationErrors = "";
+    Dictionary<string, string> schemaValidationErrors = new Dictionary<string, string>();
     const int MaxFileSize = 5 * 1024 * 1024; // 5MB
     string status = DefaultStatus;
     string uploadSchemaStatus = DefaultUploadSchemaStatus;
@@ -115,7 +116,6 @@
 
     async Task UploadFile(IFileListEntry file)
     {
-        //var xmlReader = await this.LoadFile(file);
         var ms = new MemoryStream();
         await file.Data.CopyToAsync(ms);
         string str = System.Text.Encoding.UTF8.GetString(ms.ToArray());
@@ -125,7 +125,7 @@
         var xml = (DealershipModel)serializer.Deserialize(xmlReader);
         XDocument doc = XDocument.Parse(str);
 
-        string msg = "";
+        string msg = $"";
         doc.Validate(schemas, (o, e) =>
         {
             msg += e.Message + Environment.NewLine;
@@ -133,7 +133,7 @@
 
         if (msg.Length > 0)
         {
-            this.schemaValidationErrors = msg;
+            this.schemaValidationErrors.Add(file.Name, msg);
         }
         else
         {
@@ -156,50 +156,5 @@
         var xmlReader = XmlReader.Create(new StringReader(str));
 
         return xmlReader;
-    }
-
-    async Task ViewFile(IFileListEntry[] files)
-    {
-        var file = files.FirstOrDefault();
-        if (file == null)
-        {
-            return;
-        }
-        else if (file.Size > MaxFileSize)
-        {
-            status = $"That's too big. Max size: {MaxFileSize} bytes.";
-        }
-
-        XmlSerializer serializer = new XmlSerializer(typeof(DealershipModel));
-
-        var ms = new System.IO.MemoryStream();
-        await file.Data.CopyToAsync(ms);
-
-
-
-
-
-
-        //XmlSchemaSet schemas = new XmlSchemaSet();
-        //schemas.Add(@"https://www.w3schools.com", "schema.xsd");
-        //XDocument doc = XDocument.Load("dealership.xml");
-        //string msg = "";
-        //doc.Validate(schemas, (o, e) =>
-        //{
-        //    msg += e.Message + Environment.NewLine;
-        //});
-        //Console.WriteLine(msg == "" ? "Document is valid" : "Document invalid: " + msg);
-        //else
-        //{
-        //    status = "Loading...";
-
-        //    using (var reader = new StreamReader(file.Data))
-        //    {
-        //        fileTextContents = await reader.ReadToEndAsync();
-        //        fileName = file.Name;
-        //    }
-
-        //    status = DefaultStatus;
-        //}
     }
 }

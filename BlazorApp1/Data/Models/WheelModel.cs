@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
 
-        public RimsModel Rims { get; set; }
-        
-        public TireModel Tires { get; set; }
+        public RimsModel Rims { get; set; } = new RimsModel();
+
+        public TireModel Tires { get; set; } = new TireModel();
     }
 }

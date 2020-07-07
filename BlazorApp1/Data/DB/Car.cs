@@ -8,6 +8,9 @@ namespace Car_Dealership.Models.DB
         [Key]
         public int Id { get; set; }
 
+        [ForeignKey("Dealership")]
+        public int DealershipId { get; set; }
+
         public virtual ManufactureDetails ManufactureDetails { get; set; }
 
         public virtual EngineDetails EngineDetails { get; set; }
@@ -16,6 +19,8 @@ namespace Car_Dealership.Models.DB
 
         public virtual Wheels Wheels { get; set; }
         public virtual TransmissionDetails TransmissionDetails { get; set; }
+
+        public virtual Dealership Dealership { get; set; }
         public int Price { get; set; }
     }
 }

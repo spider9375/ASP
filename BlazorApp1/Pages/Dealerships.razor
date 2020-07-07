@@ -3,8 +3,15 @@
 @using BlazorApp1.Data.Interfaces;
 @using BlazorApp1.Data.ViewModels;
 @inject IDealershipService DealershipService;
+@inject NavigationManager NavigationManager
 
 <h1>Автокъщи</h1>
+
+<div class="row">
+    <div class="col-12">
+        <button @onclick="@(e => NavigationManager.NavigateTo("create"))" class="btn-success btn-block" disabled="@(!this.hasSchema)">Създай</button>
+    </div>
+</div>
 
 @if (dealerships == null)
 {
@@ -27,11 +34,7 @@ else
                     <td>@dealership.Address</td>
                     <td>
                         <a href="/Dealership/@dealership.Id"><i class="glyphicon glyphicon-search"></i></a>
-
-                        @*<button type="submit" asp-page-handler="delete"
-                                    asp-route-id="@dealership.Id">
-                                delete
-                            </button>*@
+                        <span><i @onclick="@(e => Delete(dealership.Id))" class="glyphicon glyphicon-remove"></i></span>
                     </td>
                 </tr>
             }
@@ -41,9 +44,17 @@ else
 
 @code {
     private List<DealershipViewModel> dealerships;
+    private bool hasSchema { get; set; }
 
     protected override void OnInitialized()
     {
-        dealerships = this.DealershipService.GetDealershipDataTable();
+        this.dealerships = this.DealershipService.GetDealershipDataTable();
+        this.hasSchema = this.DealershipService.GetSchemaSet().Count > 0;
+    }
+
+    private void Delete(int id)
+    {
+        this.DealershipService.Delete(id);
+        this.dealerships = this.DealershipService.GetDealershipDataTable();
     }
 }

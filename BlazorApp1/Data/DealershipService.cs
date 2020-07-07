@@ -38,6 +38,29 @@ namespace BlazorApp1.Data
             throw new NotImplementedException();
         }
 
+        public void Delete(int id)
+        {
+            var entity = this.dbContext.Dealerships.Find(id);
+
+            if (entity != null)
+            {
+                entity.Cars.ToList().ForEach(car =>
+                {
+                    this.dbContext.EngineDetails.Remove(car.EngineDetails);
+                    this.dbContext.ManufactureDetails.Remove(car.ManufactureDetails);
+                    this.dbContext.TransmissionsDetails.Remove(car.TransmissionDetails);
+                    this.dbContext.VisualDetails.Remove(car.VisualDetails);
+                    this.dbContext.Tires.Remove(car.Wheels.Tires);
+                    this.dbContext.Rims.Remove(car.Wheels.Rims);
+                    this.dbContext.Wheels.Remove(car.Wheels);
+                    this.dbContext.Cars.Remove(car);
+                });
+
+                this.dbContext.Dealerships.Remove(entity);
+                this.dbContext.SaveChanges();
+            }
+        }
+
         public List<CarsTableViewModel> GetCarsDataTableData(int dealershipId)
         {
             var result = this.dbContext.Dealerships.FirstOrDefault(x => x.Id == dealershipId)

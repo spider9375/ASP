@@ -65,6 +65,7 @@ namespace BlazorApp1.Data
         {
             return new Dealership()
             {
+                Id = model.Id,
                 Address = model.Address,
                 Cars = model.Cars.Select(x => new Car()
                 {

@@ -21,5 +21,7 @@ namespace BlazorApp1.Data.Interfaces
         public XmlReader UploadSchema(MemoryStream stream);
 
         public XmlSchemaSet GetSchemaSet();
+
+        public void Delete(int id);
     }
 }
