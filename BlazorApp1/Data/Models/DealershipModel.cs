@@ -5,7 +5,7 @@ namespace BlazorApp1.Data.Models
 {
     public class DealershipModel
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         [Required(ErrorMessage = "Моля въведете адрес.")]
         public string Address { get; set; }

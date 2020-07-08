@@ -5,6 +5,7 @@ using Car_Dealership.Models;
 using Car_Dealership.Models.DB;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.IO;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace BlazorApp1.Data
             throw new NotImplementedException();
         }
 
-        public void Delete(int id)
+        private void _delete(int id)
         {
             var entity = this.dbContext.Dealerships.Find(id);
 
@@ -57,8 +58,38 @@ namespace BlazorApp1.Data
                 });
 
                 this.dbContext.Dealerships.Remove(entity);
-                this.dbContext.SaveChanges();
             }
+        }
+
+        public void Delete(int id)
+        {
+                this._delete(id);
+                this.dbContext.SaveChanges();
+        }
+
+        public void Edit(Models.DealershipModel model)
+        {
+            var entity = this.dbContext.Dealerships.Find(model.Id);
+
+            if (entity != null)
+            {
+                this._delete(entity.Id);
+                this.dbContext.Dealerships.Add(this.mappingService.ModelToEntity(model));
+                this.dbContext.SaveChanges();
+
+            }
+        }
+
+        public Models.DealershipModel Get(int id)
+        {
+            var entity = this.dbContext.Dealerships.Find(id);
+
+            if (entity != null)
+            {
+                return this.mappingService.EntityToModel(entity);
+            }
+
+            return null;
         }
 
         public List<CarsTableViewModel> GetCarsDataTableData(int dealershipId)

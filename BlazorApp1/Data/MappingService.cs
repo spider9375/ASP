@@ -63,9 +63,8 @@ namespace BlazorApp1.Data
 
         public Dealership ModelToEntity(Models.DealershipModel model)
         {
-            return new Dealership()
+            var result = new Dealership()
             {
-                Id = model.Id,
                 Address = model.Address,
                 Cars = model.Cars.Select(x => new Car()
                 {
@@ -114,6 +113,14 @@ namespace BlazorApp1.Data
                 })
                 .ToList()
             };
+
+            if (model.Id.HasValue)
+            {
+                result.Id = model.Id.Value;
+            }
+
+            return result;
+
         }
 
         public Car_Dealership.Models.DealershipModel ModelToXml(Models.DealershipModel model)

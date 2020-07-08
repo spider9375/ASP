@@ -1,4 +1,5 @@
-﻿using BlazorApp1.Data.ViewModels;
+﻿using BlazorApp1.Data.Models;
+using BlazorApp1.Data.ViewModels;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -12,7 +13,11 @@ namespace BlazorApp1.Data.Interfaces
 
         public DealershipViewModel GetDealershipDetails(int dealershipId);
 
-        public void Add(Models.DealershipModel model);
+        public DealershipModel Get(int id);
+
+        public void Add(DealershipModel model);
+
+        public void Edit(DealershipModel model);
 
         public void Add(List<Models.DealershipModel> models);
 

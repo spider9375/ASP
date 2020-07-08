@@ -1,0 +1,267 @@
+﻿@page "/create"
+@page "/edit/{dealershipId:int}"
+@inject IDealershipService dealershipService;
+@inject IMappingService mappingService;
+@inject NavigationManager NavigationManager;
+
+<h1>Създаване на автокъща</h1>
+<EditForm EditContext="@EditContext">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label for="@dealership.Address">Адрес</label>
+        <InputText Class="form-control" @bind-Value="@dealership.Address"></InputText>
+        <ValidationMessage For="@(() => dealership.Address)" />
+    </div>
+    <br />
+    <h2>Коли</h2>
+    <br />
+    <button @onclick="@(() => dealership.Cars.Add(new BlazorApp1.Data.Models.CarModel()))">Добави Кола</button>
+    @foreach (var car in dealership.Cars)
+    {
+        <div class="container">
+            <h3 class="text-center">Детайли</h3>
+            <div class="row">
+                <div class="col-sm-4">
+                    <label for="@car.ManufactureDetails.Manufacturer">Марка</label>
+                    <InputSelect Class="form-control" @bind-Value="@car.ManufactureDetails.Manufacturer">
+                        @foreach (var str in manufacturerType)
+                            {
+                            <option value="@str">@str</option>
+                            }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => car.ManufactureDetails.Model)" />
+                </div>
+                <div class="col-sm-4">
+                    <label for="@car.ManufactureDetails.Manufacturer">Модел</label>
+                    <InputText Class="form-control" @bind-Value="@car.ManufactureDetails.Model"></InputText>
+                    <ValidationMessage For="@(() => car.ManufactureDetails.Model)" />
+                </div>
+                <div class="col-sm-4">
+                    <label for="@car.ManufactureDetails.Manufacturer">Година</label>
+                    <InputText Class="form-control" @bind-Value="@car.ManufactureDetails.Year"></InputText>
+                    <ValidationMessage For="@(() => car.ManufactureDetails.Year)" />
+                </div>
+            </div>
+            <h3 class="text-center">Двигател</h3>
+            <div class="row">
+                <div class="col-sm-4">
+                    <label for="@car.EngineDetails.EngineType">Тип двигател</label>
+                    <InputSelect Class="form-control" @bind-Value="@car.EngineDetails.EngineType">
+                        @foreach (var str in engineType)
+                            {
+                            <option value="@str">@str</option>
+                            }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => car.EngineDetails.EngineType)" />
+                </div>
+                <div class="col-sm-4">
+                    <label for="@car.EngineDetails.EngineVolume">Обем</label>
+                    <InputNumber Class="form-control" @bind-Value="@car.EngineDetails.EngineVolume"></InputNumber>
+                    <ValidationMessage For="@(() => car.EngineDetails.EngineVolume)" />
+                </div>
+                <div class="col-sm-4">
+                    <label for="@car.EngineDetails.HorsePower">Конски сили</label>
+                    <InputNumber Class="form-control" @bind-Value="@car.EngineDetails.HorsePower"></InputNumber>
+                    <ValidationMessage For="@(() => car.EngineDetails.HorsePower)" />
+                </div>
+            </div>
+            <h3 class="text-center">Визуални детайли</h3>
+            <div class="row">
+                <div class="col-sm-3">
+                    <label for="@car.VisualDetails.BodyType">Купе</label>
+                    <InputSelect Class="form-control" @bind-Value="@car.VisualDetails.BodyType">
+                        @foreach (var str in bodyType)
+                            {
+                            <option value="@str">@str</option>
+                            }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => car.VisualDetails.BodyType)" />
+                </div>
+                <div class="col-sm-3">
+                    <label for="@car.VisualDetails.Color">Цвят</label>
+                    <InputText Class="form-control" @bind-Value="@car.VisualDetails.Color"></InputText>
+                    <ValidationMessage For="@(() => car.VisualDetails.Color)" />
+                </div>
+                <div class="col-sm-3">
+                    <label for="@car.VisualDetails.DoorCount">Брой врати</label>
+                    <InputNumber Class="form-control" @bind-Value="@car.VisualDetails.DoorCount"></InputNumber>
+                    <ValidationMessage For="@(() => car.VisualDetails.DoorCount)" />
+                </div>
+                <div class="col-sm-3">
+                    <label for="@car.VisualDetails.HasWing">Има спойлер</label>
+                    <InputCheckbox Class="form-control" @bind-Value="@car.VisualDetails.HasWing"></InputCheckbox>
+                    <ValidationMessage For="@(() => car.VisualDetails.HasWing)" />
+                </div>
+            </div>
+            <h3 class="text-center">Скорости</h3>
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="@car.Transmission.TransmissionType">Вид</label>
+                    <InputSelect Class="form-control" @bind-Value="@car.Transmission.TransmissionType">
+                        @foreach (var str in transmissionType)
+                            {
+                            <option value="@str">@str</option>
+                            }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => car.Transmission.TransmissionType)" />
+                </div>
+                <div class="col-sm-6">
+                    <label for="@car.Transmission.GearCount">Брой скорости</label>
+                    <InputNumber Class="form-control" @bind-Value="@car.Transmission.GearCount"></InputNumber>
+                    <ValidationMessage For="@(() => car.Transmission.GearCount)" />
+                </div>
+            </div>
+            <h3 class="text-center">Джанти</h3>
+            <div class="row">
+                <div class="col-sm-3">
+                    <label for="@car.Wheels.Rims.Color">Цвят</label>
+                    <InputText Class="form-control" @bind-Value="@car.Wheels.Rims.Color"></InputText>
+                    <ValidationMessage For="@(() => car.Wheels.Rims.Color)" />
+                </div>
+                <div class="col-sm-3">
+                    <label for="@car.Wheels.Rims.RimBrand">Марка</label>
+                    <InputSelect Class="form-control" @bind-Value="@car.Wheels.Rims.RimBrand">
+                        @foreach (var str in rimBrands)
+                            {
+                            <option value="@str">@str</option>
+                            }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => car.Wheels.Rims.RimBrand)" />
+                </div>
+                <div class="col-sm-3">
+                    <label for="@car.Wheels.Rims.Model">Модел</label>
+                    <InputText Class="form-control" @bind-Value="@car.Wheels.Rims.Model"></InputText>
+                    <ValidationMessage For="@(() => car.Wheels.Rims.Model)" />
+                </div>
+                <div class="col-sm-3">
+                    <label for="@car.Wheels.Rims.Size">Размер</label>
+                    <InputNumber Class="form-control" @bind-Value="@car.Wheels.Rims.Size"></InputNumber>
+                    <ValidationMessage For="@(() => car.Wheels.Rims.Size)" />
+                </div>
+            </div>
+            <h3 class="text-center">Гуми</h3>
+            <div class="row">
+                <div class="col-sm-4">
+                    <label for="@car.Wheels.Tires.TireBrand">Марка</label>
+                    <InputSelect Class="form-control" @bind-Value="@car.Wheels.Tires.TireBrand">
+                        @foreach (var str in tireBrands)
+                            {
+                            <option value="@str">@str</option>
+                            }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => car.Wheels.Tires.TireBrand)" />
+                </div>
+                <div class="col-sm-4">
+                    <label for="@car.Wheels.Tires.TireSeason">Сезон</label>
+                    <InputSelect Class="form-control" @bind-Value="@car.Wheels.Tires.TireSeason">
+                        @foreach (var str in tireSeasons)
+                            {
+                            <option value="@str">@str</option>
+                            }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => car.Wheels.Tires.TireSeason)" />
+                </div>
+                <div class="col-sm-4">
+                    <label for="@car.Wheels.Tires.Width">Диаметър</label>
+                    <InputNumber Class="form-control" @bind-Value="@car.Wheels.Tires.Width"></InputNumber>
+                    <ValidationMessage For="@(() => car.Wheels.Tires.Width)" />
+                </div>
+            </div>
+            <h3></h3>
+            <div>
+                <label for="@car.Price">Цена</label>
+                <InputNumber Class="form-control" @bind-Value="@car.Price"></InputNumber>
+                <ValidationMessage For="@(() => car.Price)" />
+            </div>
+        </div>
+    }
+
+    <button class="btn-primary" @onclick="@(() => this.Upload())">Създай</button>
+</EditForm>
+
+
+@code
+ {
+    [Parameter]
+    public int? dealershipId { get; set; }
+    public string headerText;
+    private EditContext EditContext;
+    private List<string> transmissionType = new List<string>() { "", "Ръчни", "Автоматични" };
+    private List<string> manufacturerType = new List<string>() { "Ауди", "Голф", "БМВ", "Хонда", "Хюндай", "Мазда", "Субару", "Нисан", "Тойота", "Тесла" };
+    private List<string> engineType = new List<string>() { "Бензин", "Дизел", "Електричен" };
+    private List<string> bodyType = new List<string>() { "Седан", "Купе", "Комби" };
+    private List<string> rimBrands = new List<string>() { "ОЗ", "ББС" };
+    private List<string> tireBrands = new List<string>() { "Мишелин", "Гуудийр" };
+    private List<string> tireSeasons = new List<string>() { "Летни", "Зимни", "Всесезонни" };
+
+    private BlazorApp1.Data.Models.DealershipModel dealership = new BlazorApp1.Data.Models.DealershipModel();
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(dealership);
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+
+        if (dealershipId.HasValue)
+        {
+            this.headerText = "Редакция на автокъща";
+            this.dealership = this.dealershipService.Get(dealershipId.Value);
+        }
+
+        base.OnInitialized();
+    }
+
+    // Note: The OnFieldChanged event is raised for each field in the model
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if (e.FieldIdentifier.FieldName == "Pet")
+        {
+
+        }
+    }
+
+    private void Upload()
+    {
+        var schemas = this.dealershipService.GetSchemaSet();
+        var xmlModel = this.mappingService.ModelToXml(this.dealership);
+
+        XmlSerializer serializer = new XmlSerializer(typeof(DealershipModel));
+        string xml;
+
+        using (var sww = new StringWriter())
+        {
+            using (XmlWriter writer = new XmlTextWriter(sww) { Formatting = Formatting.Indented })
+            {
+                serializer.Serialize(writer, xmlModel);
+                xml = sww.ToString(); // Your XML
+            }
+        }
+
+        XDocument doc = XDocument.Parse(xml);
+        string msg = $"";
+        doc.Validate(schemas, (o, e) =>
+        {
+            msg += e.Message + Environment.NewLine;
+        });
+
+        if (msg.Length > 0)
+        {
+
+        }
+        else
+        {
+            if (dealershipId == null)
+            {
+                this.dealershipService.Add(this.dealership);
+            }
+            else
+            {
+                this.dealership.Id = this.dealershipId;
+                this.dealershipService.Edit(this.dealership);
+            }
+
+            NavigationManager.NavigateTo("dealerships");
+        }
+
+    }
+}
