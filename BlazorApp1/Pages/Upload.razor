@@ -1,4 +1,6 @@
 ﻿@page "/upload"
+@using System.Collections.Generic;
+@using Data.Enums;  
 @inject IDealershipService dealershipService;
 @inject IMappingService mappingService;
 
@@ -21,36 +23,41 @@
 @if (selectedFiles != null)
 {
     <div>
-        <button class="btn-primary" onclick="UploadAll">Прикачи всички</button>
+        <button class="btn-primary" @onclick="@(() => UploadAll())">Прикачи всички</button>
     </div>
     foreach (var file in selectedFiles)
     {
-        var isLoading = file.Data.Position > 0;
-
         <div class="file-row">
             <!-- File info -->
             <div>
                 <h2>@file.Name</h2>
-                Size: <strong>@file.Size bytes</strong>;
-                Last modified: <strong>@file.LastModified.ToShortDateString()</strong>;
-                Type: <strong>@file.Type</strong>
+                Размер: <strong>@file.Size bytes</strong>;
+                Последно променен: <strong>@file.LastModified.ToShortDateString()</strong>;
+                Тип: <strong>@file.Type</strong>
             </div>
-            @if (schemaValidationErrors.Count > 0)
+            @if (UploadStatus.Failed == fileUploadedDictionary[file.Name])
             {
                 <div>
-                    <p>@schemaValidationErrors[file.Name]</p>
+                    <h5 class="text-danger">Файлът има грешки:</h5>
+                </div>
+                <div>
+                    <p class="text-danger">@schemaValidationErrors[file.Name]</p>
                 </div>
             }
 
             <!-- Upload button -->
-            <button @onclick="() => UploadFile(file)" disabled="@isLoading">
-                @if (!isLoading)
+            <button @onclick="() => UploadFile(file)" disabled="@(UploadStatus.Failed == fileUploadedDictionary[file.Name] || UploadStatus.Uploaded == fileUploadedDictionary[file.Name])">
+                @if ((UploadStatus.Pending == fileUploadedDictionary[file.Name]))
                 {
                     <span>Импорт</span>
                 }
-                else
+                else if ((UploadStatus.Uploaded == fileUploadedDictionary[file.Name]))
                 {
                     <span>Импортирано @((100.0 * file.Data.Position / file.Size).ToString("0"))%</span>
+                }
+                else if ((UploadStatus.Failed == fileUploadedDictionary[file.Name]))
+                {
+                    <span>Невалидно</span>
                 }
             </button>
         </div>
@@ -58,11 +65,26 @@
 }
 
 @code {
-    IFileListEntry[] selectedFiles;
+    List<IFileListEntry> selectedFiles = new List<IFileListEntry>();
+    Dictionary<string, UploadStatus> fileUploadedDictionary = new Dictionary<string, UploadStatus>();
 
     void HandleSelection(IFileListEntry[] files)
     {
-        selectedFiles = files;
+        foreach (var file in files)
+        {
+            if (fileUploadedDictionary.ContainsKey(file.Name))
+            {
+                var existingFile = this.selectedFiles.Find(x => x.Name == file.Name);
+                selectedFiles.Remove(existingFile);
+                fileUploadedDictionary[file.Name] = UploadStatus.Pending;
+            }
+            else
+            {
+                fileUploadedDictionary.Add(file.Name, UploadStatus.Pending);
+            }
+        }
+
+        selectedFiles.AddRange(files);
     }
 
     const string DefaultStatus = "Пуснете файл тук, или кликнете, за да изберете файл/ове";
@@ -73,9 +95,6 @@
     const int MaxFileSize = 5 * 1024 * 1024; // 5MB
     string status = DefaultStatus;
     string uploadSchemaStatus = DefaultUploadSchemaStatus;
-
-    string fileName;
-    string fileTextContents;
 
     protected override void OnInitialized()
     {
@@ -90,11 +109,24 @@
         }
     }
 
-    void UploadAll()
+    async Task UploadAll()
     {
-        var models = this.selectedFiles.Select(x => this.mappingService.XmlToModel((DealershipModel)serializer.Deserialize(this.LoadFile(x).Result))).ToList();
+        Dictionary<string, Data.Models.DealershipModel> validModels = new Dictionary<string, Data.Models.DealershipModel>();
 
-        this.dealershipService.Add(models);
+        foreach (var file in this.selectedFiles)
+        {
+            var validModel = await this.Validate(file);
+            if (validModel != null)
+            {
+                validModels.Add(file.Name, validModel);
+            }
+        }
+
+        this.dealershipService.Add(validModels.Values.ToList());
+        foreach (var item in validModels)
+        {
+            fileUploadedDictionary[item.Key] = UploadStatus.Uploaded;
+        }
     }
 
     async Task UploadSchema(IFileListEntry[] files)
@@ -114,7 +146,7 @@
 
     }
 
-    async Task UploadFile(IFileListEntry file)
+    private async Task<Data.Models.DealershipModel> Validate(IFileListEntry file)
     {
         var ms = new MemoryStream();
         await file.Data.CopyToAsync(ms);
@@ -134,12 +166,25 @@
         if (msg.Length > 0)
         {
             this.schemaValidationErrors.Add(file.Name, msg);
+            fileUploadedDictionary[file.Name] = UploadStatus.Failed;
+
+            return null;
         }
         else
         {
-            var model = this.mappingService.XmlToModel(xml);
+            this.schemaValidationErrors.Remove(file.Name);
+            return this.mappingService.XmlToModel(xml);
+        }
+    }
 
-            this.dealershipService.Add(model);
+    async Task UploadFile(IFileListEntry file)
+    {
+        var validatedModel = await Validate(file);
+
+        if (validatedModel != null)
+        {
+            this.dealershipService.Add(validatedModel);
+            fileUploadedDictionary[file.Name] = UploadStatus.Uploaded;
         }
     }
 

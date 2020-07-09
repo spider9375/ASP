@@ -1,4 +1,6 @@
-﻿namespace BlazorApp1.Data.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BlazorApp1.Data.Models
 {
     public class CarModel
     {
@@ -8,6 +10,7 @@
         public VisualDetailsModel VisualDetails { get; set; } = new VisualDetailsModel();
         public WheelModel Wheels { get; set; } = new WheelModel();
         public TransmissionDetailsModel Transmission { get; set; } = new TransmissionDetailsModel();
+        [Required(ErrorMessage = "Цена е задължително")]
         public int Price { get; set; }
     }
 }

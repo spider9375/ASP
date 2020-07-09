@@ -39,7 +39,7 @@
                 </div>
                 <div class="col-sm-4">
                     <label for="@car.ManufactureDetails.Manufacturer">Година</label>
-                    <InputText Class="form-control" @bind-Value="@car.ManufactureDetails.Year"></InputText>
+                    <InputNumber Class="form-control" @bind-Value="@car.ManufactureDetails.Year"></InputNumber>
                     <ValidationMessage For="@(() => car.ManufactureDetails.Year)" />
                 </div>
             </div>
@@ -188,19 +188,18 @@
     public string headerText;
     private EditContext EditContext;
     private List<string> transmissionType = new List<string>() { "", "Ръчни", "Автоматични" };
-    private List<string> manufacturerType = new List<string>() { "Ауди", "Голф", "БМВ", "Хонда", "Хюндай", "Мазда", "Субару", "Нисан", "Тойота", "Тесла" };
-    private List<string> engineType = new List<string>() { "Бензин", "Дизел", "Електричен" };
-    private List<string> bodyType = new List<string>() { "Седан", "Купе", "Комби" };
-    private List<string> rimBrands = new List<string>() { "ОЗ", "ББС" };
-    private List<string> tireBrands = new List<string>() { "Мишелин", "Гуудийр" };
-    private List<string> tireSeasons = new List<string>() { "Летни", "Зимни", "Всесезонни" };
+    private List<string> manufacturerType = new List<string>() { "", "Ауди", "Голф", "БМВ", "Хонда", "Хюндай", "Мазда", "Субару", "Нисан", "Тойота", "Тесла" };
+    private List<string> engineType = new List<string>() { "", "Бензин", "Дизел", "Електричен" };
+    private List<string> bodyType = new List<string>() { "", "Седан", "Купе", "Комби" };
+    private List<string> rimBrands = new List<string>() { "", "ОЗ", "ББС" };
+    private List<string> tireBrands = new List<string>() { "", "Мишелин", "Гуудийр" };
+    private List<string> tireSeasons = new List<string>() { "", "Летни", "Зимни", "Всесезонни" };
 
     private BlazorApp1.Data.Models.DealershipModel dealership = new BlazorApp1.Data.Models.DealershipModel();
 
     protected override void OnInitialized()
     {
         EditContext = new EditContext(dealership);
-        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
 
         if (dealershipId.HasValue)
         {
@@ -209,15 +208,6 @@
         }
 
         base.OnInitialized();
-    }
-
-    // Note: The OnFieldChanged event is raised for each field in the model
-    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
-    {
-        if (e.FieldIdentifier.FieldName == "Pet")
-        {
-
-        }
     }
 
     private void Upload()

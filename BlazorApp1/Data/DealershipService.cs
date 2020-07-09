@@ -36,7 +36,10 @@ namespace BlazorApp1.Data
 
         public void Add(List<Models.DealershipModel> models)
         {
-            throw new NotImplementedException();
+            var entities = models.Select(x => this.mappingService.ModelToEntity(x));
+
+            this.dbContext.Dealerships.AddRange(entities);
+            this.dbContext.SaveChanges();
         }
 
         private void _delete(int id)

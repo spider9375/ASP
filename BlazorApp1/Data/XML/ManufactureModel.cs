@@ -10,6 +10,6 @@ namespace Car_Dealership.Models
         [XmlElement("model")]
         public string Model { get; set; }
         [XmlElement("year")]
-        public string Year { get; set; }
+        public int Year { get; set; }
     }
 }

@@ -9,6 +9,6 @@
 
         public decimal EngineVolume { get; set; }
 
-        public string Year { get; set; }
+        public int Year { get; set; }
     }
 }
