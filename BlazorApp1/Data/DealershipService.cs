@@ -1,15 +1,9 @@
 ﻿using BlazorApp1.Data.Interfaces;
 using BlazorApp1.Data.ViewModels;
 using Car_Dealership;
-using Car_Dealership.Models;
-using Car_Dealership.Models.DB;
-using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core.Mapping;
-using System.Data.Entity.Core.Metadata.Edm;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Xml;
 using System.Xml.Schema;
 
@@ -93,23 +87,6 @@ namespace BlazorApp1.Data
             }
 
             return null;
-        }
-
-        public List<CarsTableViewModel> GetCarsDataTableData(int dealershipId)
-        {
-            var result = this.dbContext.Dealerships.FirstOrDefault(x => x.Id == dealershipId)
-                ?.Cars.Select(car => new CarsTableViewModel()
-                {
-                    Id = car.Id,
-                    Manufacturer = car.ManufactureDetails.Manufacturer,
-                    EngineType = car.EngineDetails.EngineType,
-                    EngineVolume = car.EngineDetails.EngineVolume,
-                    Model = car.ManufactureDetails.Model,
-                    Year = car.ManufactureDetails.Year
-                })
-                .ToList();
-
-            return result;
         }
 
         public List<DealershipViewModel> GetDealershipDataTable()

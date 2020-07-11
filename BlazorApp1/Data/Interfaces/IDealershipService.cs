@@ -21,8 +21,6 @@ namespace BlazorApp1.Data.Interfaces
 
         public void Add(List<Models.DealershipModel> models);
 
-        public List<CarsTableViewModel> GetCarsDataTableData(int dealershipId);
-
         public XmlReader UploadSchema(MemoryStream stream);
 
         public XmlSchemaSet GetSchemaSet();
