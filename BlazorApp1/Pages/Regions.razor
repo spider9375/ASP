@@ -1,0 +1,94 @@
+﻿@page "/regions"
+
+@using BlazorApp1.Data.Models
+@inject IRegionService regionsService;
+
+<h1>Региони</h1>
+
+<button class="btn-block btn-primary" @onclick="(e => ExpandCreateEdit())">Добави</button>
+@if (expandCreateView)
+{
+    <EditForm EditContext="@EditContext">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="@regionCreateEditModel.Name">Име</label>
+                    <InputText Class="form-control" @bind-Value="@regionCreateEditModel.Name"></InputText>
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <button class="btn-primary" @onclick="@(() => this.Create())">Потвърди</button>
+    </EditForm>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>Име</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var region in regions)
+        {
+            <tr>
+                <td>@region.Id</td>
+                <td>@region.Name</td>
+                <td>
+                    <span><i @onclick="@(e => Delete(region.Id))" class="glyphicon glyphicon-remove"></i></span>
+                    <span><i @onclick="@(e => Edit(region.Id))" class="glyphicon glyphicon-edit"></i></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<NomModel> regions;
+    private bool expandCreateView = false;
+    private NomModel regionCreateEditModel = new NomModel();
+    private EditContext EditContext;
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(regionCreateEditModel);
+        this.regions = this.regionsService.GetDataTableItems();
+    }
+
+    private void Delete(int id)
+    {
+        this.regionsService.Delete(id);
+        this.regions = this.regionsService.GetDataTableItems();
+    }
+
+    public void ExpandCreateEdit()
+    {
+        this.expandCreateView = true;
+        this.regionCreateEditModel = new NomModel();
+    }
+
+    public void Edit(int id)
+    {
+        this.expandCreateView = true;
+        this.regionCreateEditModel = this.regionsService.Get(id);
+    }
+
+    public void Create()
+    {
+        if (regionCreateEditModel.Id != 0)
+        {
+            this.regionsService.Update(regionCreateEditModel);
+        }
+        else
+        {
+           this.regionsService.Create(regionCreateEditModel);
+        }
+
+        this.expandCreateView = false;
+        this.regionCreateEditModel = new NomModel();
+
+        this.regions = this.regionsService.GetDataTableItems();
+    }
+}

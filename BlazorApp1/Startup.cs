@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using BlazorApp1.Data;
-using Car_Dealership;
 using BlazorApp1.Data.Interfaces;
+using BlazorApp1.Data.Services;
 
 namespace BlazorApp1
 {
@@ -24,9 +23,10 @@ namespace BlazorApp1
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddTransient<DealershipContext, DealershipContext>();
-            services.AddTransient<IDealershipService, DealershipService>();
-            services.AddTransient<IMappingService, MappingService>();
+            services.AddTransient<HotelsContext, HotelsContext>();
+            services.AddTransient<IHotelService, HotelService>();
+            services.AddTransient<ICityService, CityService>();
+            services.AddTransient<IRegionService, RegionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

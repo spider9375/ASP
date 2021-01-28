@@ -1,4 +1,5 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@using BlazorApp1.Data.Services
+<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">BlazorApp1</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
@@ -13,13 +14,28 @@
             </NavLink>
         </li>
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="dealerships">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Автокъщи
+            <NavLink class="nav-link" href="regions">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Региони
             </NavLink>
         </li>
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="upload">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Прикачи
+            <NavLink class="nav-link" href="cities">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Градове
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="hotels">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Хотели
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="create">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Създаване на хотел
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="cart">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Количка (@Cart.cart.Count)
             </NavLink>
         </li>
     </ul>

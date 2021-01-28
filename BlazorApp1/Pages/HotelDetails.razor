@@ -1,0 +1,88 @@
+﻿@page "/hotel/{hotelId:int}"
+@using BlazorApp1.Data.Models
+@using BlazorApp1.Data
+@using BlazorApp1.Data.Services
+@inject ICityService cityService;
+@inject IHotelService hotelService;
+@inject NavigationManager NavigationManager;
+
+<h1>@headerText</h1>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-sm-6">
+                <label>Име</label>
+                <label>@hotel.Name</label>
+            </div>
+            <div class="col-sm-6">
+                <label for="@hotel.CityId">Град</label>
+                <label>@cities.FirstOrDefault(c => c.Id == hotel.CityId)?.Name.</label>
+            </div>
+        </div>
+        <div class="row">
+            <h3>Стаи</h3>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Брой легла</th>
+                    <th>Цена</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var room in hotel.Rooms)
+            {
+                <tr>
+                    <td>@room.Id</td>
+                    <td>@room.BedCount</td>
+                    <td>@room.Price</td>
+                    <td>
+                        <button disabled="@IsInCart(room.Id)" @onclick="(e => this.AddToCart(room))">Добави в количката</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+<br />
+
+@code
+ {
+    [Parameter]
+    public int hotelId { get; set; }
+    public string headerText;
+    public string createEditBtnText;
+
+    private HotelModel hotel;
+    private List<OptionItemModel> cities = new List<OptionItemModel>();
+
+    protected override void OnInitialized()
+    {
+
+        this.cities = this.cityService.GetOptionItems();
+
+        this.hotel = this.hotelService.Get(hotelId);
+
+        base.OnInitialized();
+    }
+
+    private void AddToCart(RoomModel room)
+    {
+        var model = new CartModel()
+        {
+            Price = room.Price,
+            HotelName = hotel.Name,
+            RoomDetails = $"Брой легла: {room.BedCount}",
+            City = cities.FirstOrDefault(x => x.Id == hotel.CityId)?.Name,
+        };
+
+        Cart.cart.Add(room.Id, model );
+
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    }
+
+    private bool IsInCart(int roomId)
+    {
+        return Cart.cart.ContainsKey(roomId);
+    }
+}

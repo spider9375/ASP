@@ -1,18 +1,15 @@
 ﻿namespace BlazorApp1.Migrations
 {
-    using System;
-    using System.Data.Entity;
     using System.Data.Entity.Migrations;
-    using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<Car_Dealership.DealershipContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<HotelsContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(Car_Dealership.DealershipContext context)
+        protected override void Seed(HotelsContext context)
         {
             //  This method will be called after migrating to the latest version.
 

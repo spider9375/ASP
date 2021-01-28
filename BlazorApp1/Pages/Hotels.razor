@@ -1,0 +1,71 @@
+﻿@page "/hotels"
+
+@using BlazorApp1.Data.ViewModels;
+@using BlazorApp1.Data.Models
+@inject IHotelService HotelsService;
+@inject ICityService CityService;
+@inject IRegionService RegionService;
+
+<h1>Хотели</h1>
+
+<div class="row">
+    <div class="col-sm-4">
+        <label>Регион</label><br>
+        <select @bind="selectedRegionId">
+            @foreach (var cnt in regions)
+            {
+                <option value="@cnt.Id">@cnt.Name</option>
+            }
+        </select>
+        <div class="col-sm-4">
+            <button @onclick="@(e => SearchHotels())">Търси</button>
+        </div>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>Име</th>
+            <th>Град</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var hotel in hotels)
+        {
+            <tr>
+                <td>@hotel.Id</td>
+                <td>@hotel.Name</td>
+                <td>@hotel.City</td>
+                <td>
+                    <a href="/hotel/@hotel.Id"><i class="glyphicon glyphicon-search"></i></a>
+                    <span><i @onclick="@(e => Delete(hotel.Id))" class="glyphicon glyphicon-remove"></i></span>
+                    <a href="/edit/@hotel.Id"><i class="glyphicon glyphicon-edit"></i></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<HotelViewModel> hotels = new List<HotelViewModel>();
+    private readonly List<OptionItemModel> regions = new List<OptionItemModel>() { new OptionItemModel() { Id = 0, Name = "Всички" } };
+    private int? selectedRegionId;
+
+    protected override void OnInitialized()
+    {
+        this.regions.AddRange(this.RegionService.GetOptionItems());
+    }
+
+    private void Delete(int id)
+    {
+        this.HotelsService.Delete(id);
+        this.hotels = this.HotelsService.GetDataTableItems(selectedRegionId);
+    }
+
+    private void SearchHotels()
+    {
+        this.hotels = this.HotelsService.GetDataTableItems(this.selectedRegionId);
+    }
+}

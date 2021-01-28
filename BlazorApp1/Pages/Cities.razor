@@ -1,0 +1,113 @@
+﻿@page "/cities"
+
+@using BlazorApp1.Data.ViewModels;
+@using BlazorApp1.Data.Models
+@using BlazorApp1.Data;
+@inject ICityService citiesService;
+@inject IRegionService regionsService;
+
+<h1>Градове</h1>
+
+<button class="btn-block btn-primary" @onclick="(e => ExpandCreateEdit())">Добави</button>
+@if (expandCreateView)
+{
+    <EditForm EditContext="@EditContext">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="@cityCreateEditModel.Name">Име</label>
+
+                    <InputText Class="form-control" @bind-Value="@cityCreateEditModel.Name"></InputText>
+                </div>
+                <div class="col-sm-6">
+                    <label for="@cityCreateEditModel.RegionId">Регион</label>
+                    <CustomInputSelect Class="form-control" @bind-Value="@cityCreateEditModel.RegionId">
+                        @foreach (var region in regions)
+                            {
+                            <option value="@region.Id">@region.Name</option>
+                            }
+                    </CustomInputSelect>
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <button class="btn-primary" @onclick="@(() => this.Create())">Потвърди</button>
+    </EditForm>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>Име</th>
+            <th>Регион</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var city in cities)
+        {
+            <tr>
+                <td>@city.Id</td>
+                <td>@city.Name</td>
+                <td>@city.Region</td>
+                <td>
+                    <span><i @onclick="@(e => Delete(city.Id))" class="glyphicon glyphicon-remove"></i></span>
+                    <span><i @onclick="@(e => Edit(city.Id))" class="glyphicon glyphicon-edit"></i></span>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<CityViewModel> cities;
+    private bool expandCreateView = false;
+    private CityModel cityCreateEditModel = new CityModel();
+    private EditContext EditContext;
+
+    private List<OptionItemModel> regions = new List<OptionItemModel>();
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(cityCreateEditModel);
+        this.cities = this.citiesService.GetDataTableItems();
+    }
+
+    private void Delete(int id)
+    {
+        this.citiesService.Delete(id);
+        this.cities = this.citiesService.GetDataTableItems();
+    }
+
+    public void ExpandCreateEdit()
+    {
+        this.expandCreateView = true;
+        this.cityCreateEditModel = new CityModel();
+        this.regions = this.regionsService.GetOptionItems();
+    }
+
+    public void Edit(int id)
+    {
+        this.cityCreateEditModel = this.citiesService.Get(id);
+        this.expandCreateView = true;
+    }
+
+    public void Create()
+    {
+        if (cityCreateEditModel.Id != 0)
+        {
+            this.citiesService.Update(cityCreateEditModel);
+        }
+        else
+        {
+            this.citiesService.Create(cityCreateEditModel);
+        }
+
+        this.expandCreateView = false;
+        this.cityCreateEditModel = new CityModel();
+
+        this.cities = this.citiesService.GetDataTableItems();
+    }
+}
