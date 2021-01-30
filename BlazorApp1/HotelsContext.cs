@@ -10,5 +10,6 @@ namespace BlazorApp1
         public DbSet<City> Cities { get; set; }
         public DbSet<Region> Regions { get; set; }
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<Payment> Payments { get; set; }
     }
 }

@@ -10,15 +10,21 @@
     <div class="form-group">
         <div class="row">
             <div class="col-sm-6">
-                <label>Име</label>
-                <label>@hotel.Name</label>
+                <h1>Име</h1>
             </div>
             <div class="col-sm-6">
-                <label for="@hotel.CityId">Град</label>
-                <label>@cities.FirstOrDefault(c => c.Id == hotel.CityId)?.Name.</label>
+                <h1 for="@hotel.CityId">Град</h1>
             </div>
         </div>
-        <div class="row">
+        <div>
+            <div class="col-sm-6">
+                <h3>@hotel.Name</h3>
+            </div>
+            <div class="col-sm-6">
+                <h3>@cities.FirstOrDefault(c => c.Id == hotel.CityId)?.Name</h3>
+            </div>
+        </div>
+        <div class="row mt-5">
             <h3>Стаи</h3>
         </div>
         <table class="table">
@@ -37,7 +43,7 @@
                     <td>@room.BedCount</td>
                     <td>@room.Price</td>
                     <td>
-                        <button disabled="@IsInCart(room.Id)" @onclick="(e => this.AddToCart(room))">Добави в количката</button>
+                        <button class="btn-success" disabled="@IsInCart(room.Id)" @onclick="(e => this.AddToCart(room))"><span class="glyphicon glyphicon-shopping-cart"></span>Добави в количката</button>
                     </td>
                 </tr>
             }

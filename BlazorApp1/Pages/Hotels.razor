@@ -8,7 +8,7 @@
 
 <h1>Хотели</h1>
 
-<div class="row">
+<div class="row mb-2">
     <div class="col-sm-4">
         <label>Регион</label><br>
         <select @bind="selectedRegionId">
@@ -17,9 +17,12 @@
                 <option value="@cnt.Id">@cnt.Name</option>
             }
         </select>
-        <div class="col-sm-4">
-            <button @onclick="@(e => SearchHotels())">Търси</button>
-        </div>
+    </div>
+    
+</div>
+<div class="row mt-2">
+    <div class="col-sm-12">
+        <button class="btn-block" @onclick="@(e => SearchHotels())">Търси</button>
     </div>
 </div>
 

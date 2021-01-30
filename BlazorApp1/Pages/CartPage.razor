@@ -1,6 +1,10 @@
 ﻿@page "/cart"
 @using BlazorApp1.Data.Services
 @using BlazorApp1.Data.Models
+@using BlazorApp1.Data.PayPalClient
+@using PayPalCheckoutSdk.Orders
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager;
 <h3>Количка</h3>
 
 <table class="table">
@@ -16,16 +20,16 @@
     <tbody>
         @foreach (var cartItem in Cart.cart)
         {
-        <tr>
-            <td>@cartItem.Value.HotelName</td>
-            <td>@cartItem.Value.City</td>
-            <td>@cartItem.Value.RoomDetails</td>
-            @*<td>@cartItem.Value.Nights</td>*@
-            <td>@cartItem.Value.Price.ToString("0.00") лв.</td>
-            <td>
-                <span><i @onclick="@(e => Delete(cartItem.Key))" class="glyphicon glyphicon-remove"></i></span>
-            </td>
-        </tr>
+            <tr>
+                <td>@cartItem.Value.HotelName</td>
+                <td>@cartItem.Value.City</td>
+                <td>@cartItem.Value.RoomDetails</td>
+                @*<td>@cartItem.Value.Nights</td>*@
+                <td>@cartItem.Value.Price.ToString("0.00") лв.</td>
+                <td>
+                    <span><i @onclick="@(e => Delete(cartItem.Key))" class="glyphicon glyphicon-trash"></i></span>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
@@ -36,17 +40,43 @@
     <div class="col-sm-10"></div>
     <div class="col-sm-2"><label strong>Общо: </label> @Cart.cart.Values.Sum(x => x.Price).ToString("0.00") лв.</div>
 </div>
+<div class="row">
+    <div class="col-sm-10"></div>
+    <div class="col-sm-2">
+        <button @onclick="(e => this.Checkout())">Плати</button>
+    </div>
+
+</div>
+
 
 @code {
 
     private void Delete(int roomId)
     {
         Cart.cart.Remove(roomId);
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
-    private void Pay()
+    private async Task Checkout()
     {
+        var response = await CreateOrder.CreateOrderWithMinimumFields(Cart.cart.Values.Sum(x => x.Price).ToString("0.00"));
 
+        Order createOrderResult = response.Result<Order>();
+
+        Console.WriteLine("Status: {0}", createOrderResult.Status);
+        Console.WriteLine("Order Id: {0}", createOrderResult.Id);
+        Console.WriteLine("Intent: {0}", createOrderResult.CheckoutPaymentIntent);
+        Console.WriteLine("Links:");
+        foreach (PayPalCheckoutSdk.Orders.LinkDescription link in createOrderResult.Links)
+        {
+            Console.WriteLine("\t{0}: {1}\tCall Type: {2}", link.Rel, link.Href, link.Method);
+        }
+        AmountWithBreakdown amount = createOrderResult.PurchaseUnits[0].AmountWithBreakdown;
+        Console.WriteLine("Total Amount: {0} {1}", amount.CurrencyCode, amount.Value);
+
+        var paylink = createOrderResult.Links.FirstOrDefault(x => x.Rel == "approve").Href;
+
+        await JSRuntime.InvokeAsync<string>("open", paylink, "_blank");
     }
 
 }

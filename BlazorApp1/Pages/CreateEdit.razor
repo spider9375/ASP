@@ -44,13 +44,13 @@
         }
         <div class="row">
             <div class="col-sm-12">
-                <button @onclick="(e => hotel.Rooms.Add(new RoomModel()))">Добави стая</button>
+                <button class="btn-success" @onclick="(e => hotel.Rooms.Add(new RoomModel()))">Добави стая</button>
             </div>
         </div>
     </div>
     <br />
 
-    <button class="btn-primary" @onclick="@(() => this.Create())">Потвърди</button>
+    <button class="btn-primary btn-block" @onclick="@(() => this.Create())">Потвърди</button>
 </EditForm>
 
 
@@ -99,17 +99,21 @@
 
     private void Create()
     {
-        if (hotelId == null)
+        if (EditContext.Validate())
         {
-            this.hotelService.Create(this.hotel);
-        }
-        else
-        {
-            this.hotel.Id = this.hotelId.Value;
-            this.hotelService.Update(this.hotel);
-        }
+            if (hotelId == null)
+            {
+                this.hotelService.Create(this.hotel);
+            }
+            else
+            {
+                this.hotel.Id = this.hotelId.Value;
+                this.hotelService.Update(this.hotel);
+            }
 
-        NavigationManager.NavigateTo("hotels");
+            NavigationManager.NavigateTo("hotels");
+        }
+        
     }
 
 }
